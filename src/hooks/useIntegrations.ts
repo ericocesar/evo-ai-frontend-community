@@ -36,12 +36,19 @@ export interface KnowledgeNexusConfig {
   timeout_seconds?: number;
 }
 
+interface ViaCepConfig {
+  provider?: string;
+  connected?: boolean;
+  enabled?: boolean;
+}
+
 interface UseIntegrationsReturn {
   // Configs
   elevenLabsConfig: ElevenLabsConfig | null;
   googleCalendarConfig: GoogleCalendarConfig | null;
   googleSheetsConfig: GoogleSheetsConfig | null;
   knowledgeNexusConfig: KnowledgeNexusConfig | null;
+  viaCepConfig: ViaCepConfig | null;
 
   // Status
   credentialsConfigured: Record<string, boolean>;
@@ -95,6 +102,7 @@ export function useIntegrations(agentId: string): UseIntegrationsReturn {
   const [googleCalendarConfig, setGoogleCalendarConfig] = useState<GoogleCalendarConfig | null>(null);
   const [googleSheetsConfig, setGoogleSheetsConfig] = useState<GoogleSheetsConfig | null>(null);
   const [knowledgeNexusConfig, setKnowledgeNexusConfig] = useState<KnowledgeNexusConfig | null>(null);
+  const [viaCepConfig, setViaCepConfig] = useState<ViaCepConfig | null>(null);
 
   const [isCheckingIntegrations, setIsCheckingIntegrations] = useState(true);
   const [credentialsConfigured, setCredentialsConfigured] = useState<Record<string, boolean>>({
@@ -102,6 +110,7 @@ export function useIntegrations(agentId: string): UseIntegrationsReturn {
     'google-calendar': false,
     'google-sheets': false,
     'knowledge-nexus': false,
+    'via-cep': false,
   });
 
   const loadConfigs = useCallback(async () => {
@@ -121,6 +130,7 @@ export function useIntegrations(agentId: string): UseIntegrationsReturn {
         'google-calendar': false,
         'google-sheets': false,
         'knowledge-nexus': false,
+        'via-cep': false,
       };
 
       items.forEach(item => {
@@ -159,6 +169,13 @@ export function useIntegrations(agentId: string): UseIntegrationsReturn {
             ) as unknown as KnowledgeNexusConfig)
           : null
       );
+      setViaCepConfig(
+        configsByProvider['via-cep']
+          ? (sanitizeConfig(
+              configsByProvider['via-cep']
+            ) as unknown as ViaCepConfig)
+          : null
+      );
     } catch (error) {
       console.error('Error loading integrations:', error);
       // Reset both credentials flags and per-integration configs so the UI
@@ -167,11 +184,13 @@ export function useIntegrations(agentId: string): UseIntegrationsReturn {
       setGoogleCalendarConfig(null);
       setGoogleSheetsConfig(null);
       setKnowledgeNexusConfig(null);
+      setViaCepConfig(null);
       setCredentialsConfigured({
         elevenlabs: false,
         'google-calendar': false,
         'google-sheets': false,
         'knowledge-nexus': false,
+        'via-cep': false,
       });
     } finally {
       setIsCheckingIntegrations(false);
@@ -186,18 +205,19 @@ export function useIntegrations(agentId: string): UseIntegrationsReturn {
     (integrationId: string): boolean => {
       const configMap: Record<
         string,
-        ElevenLabsConfig | GoogleCalendarConfig | GoogleSheetsConfig | KnowledgeNexusConfig | null
+        ElevenLabsConfig | GoogleCalendarConfig | GoogleSheetsConfig | KnowledgeNexusConfig | ViaCepConfig | null
       > = {
         elevenlabs: elevenLabsConfig,
         'google-calendar': googleCalendarConfig,
         'google-sheets': googleSheetsConfig,
         'knowledge-nexus': knowledgeNexusConfig,
+        'via-cep': viaCepConfig,
       };
 
       const config = configMap[integrationId];
       return config?.connected === true;
     },
-    [elevenLabsConfig, googleCalendarConfig, googleSheetsConfig, knowledgeNexusConfig]
+    [elevenLabsConfig, googleCalendarConfig, googleSheetsConfig, knowledgeNexusConfig, viaCepConfig]
   );
 
   return {
@@ -205,6 +225,7 @@ export function useIntegrations(agentId: string): UseIntegrationsReturn {
     googleCalendarConfig,
     googleSheetsConfig,
     knowledgeNexusConfig,
+    viaCepConfig,
     credentialsConfigured,
     isCheckingIntegrations,
     reloadConfigs: loadConfigs,

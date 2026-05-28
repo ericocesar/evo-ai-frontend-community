@@ -8,13 +8,14 @@ import {
   CardTitle,
   Button,
 } from '@evoapi/design-system';
-import { ExternalLink, Plug, Check, Settings, Loader2, AlertCircle } from 'lucide-react';
+import { ExternalLink, Plug, Check, Settings, Loader2, AlertCircle, MapPin } from 'lucide-react';
 import ElevenLabsConfigDialog from '@/components/integrations/ElevenLabsConfigDialog';
 import GoogleCalendarConfigDialog from '@/components/integrations/GoogleCalendarConfigDialog';
 import GoogleSheetsConfigDialog from '@/components/integrations/GoogleSheetsConfigDialog';
 import KnowledgeNexusConfigDialog, {
   type KnowledgeNexusConfig,
 } from '@/components/integrations/KnowledgeNexusConfigDialog';
+import ViaCepConfigDialog from '@/components/integrations/ViaCepConfigDialog';
 import { useIntegrations } from '@/hooks/useIntegrations';
 import { agentIntegrationsService } from '@/services/agents/agentIntegrationsService';
 import { toast } from 'sonner';
@@ -42,6 +43,7 @@ const IntegrationsSection = ({
   const [showGoogleCalendarConfig, setShowGoogleCalendarConfig] = useState(false);
   const [showGoogleSheetsConfig, setShowGoogleSheetsConfig] = useState(false);
   const [showKnowledgeNexusConfig, setShowKnowledgeNexusConfig] = useState(false);
+  const [showViaCepConfig, setShowViaCepConfig] = useState(false);
 
   // Use custom hook for integrations status
   const { credentialsConfigured, isCheckingIntegrations, isConnected, reloadConfigs } =
@@ -102,7 +104,7 @@ const IntegrationsSection = ({
   // pelo administrador. Google Calendar / Sheets usam OAuth global e portanto
   // só ficam disponíveis quando `credentialsConfigured` indica que o admin
   // configurou as chaves correspondentes.
-  const ALWAYS_AVAILABLE_INTEGRATIONS = ['elevenlabs', 'knowledge-nexus'];
+  const ALWAYS_AVAILABLE_INTEGRATIONS = ['elevenlabs', 'knowledge-nexus', 'via-cep'];
 
   const availableIntegrations: Integration[] = [
     {
@@ -132,6 +134,13 @@ const IntegrationsSection = ({
       description:
         t('edit.integrations.knowledgeNexus.description') ||
         'Permite que o agente consulte a base de conhecimento do EvoNexus (busca híbrida) antes de responder.',
+    },
+    {
+      id: 'via-cep',
+      name: 'ViaCEP',
+      description:
+        t('edit.integrations.viaCep.description') ||
+        'Permite que o agente consulte CEPs brasileiros e obtenha endereço completo (logradouro, bairro, cidade, UF) durante o atendimento.',
     },
     // {
     //   id: 'gmail',
@@ -189,7 +198,11 @@ const IntegrationsSection = ({
                     <CardHeader className="flex flex-col items-center text-center space-y-4 pb-4">
                       {/* Logo centralizada e maior — BrandIcon aplica a cor oficial da marca */}
                       <div className="flex items-center justify-center w-20 h-20 p-3 rounded-lg bg-muted/50">
-                        <BrandIcon id={integration.id} size={48} className="h-12 w-12" />
+                        {integration.id === 'via-cep' ? (
+                          <MapPin className="h-12 w-12 text-red-500" />
+                        ) : (
+                          <BrandIcon id={integration.id} size={48} className="h-12 w-12" />
+                        )}
                       </div>
 
                       {/* Título */}
@@ -237,6 +250,8 @@ const IntegrationsSection = ({
                                 setShowGoogleSheetsConfig(true);
                               } else if (integration.id === 'knowledge-nexus') {
                                 setShowKnowledgeNexusConfig(true);
+                              } else if (integration.id === 'via-cep') {
+                                setShowViaCepConfig(true);
                               }
                             }}
                           >
@@ -249,19 +264,21 @@ const IntegrationsSection = ({
                           variant="outline"
                           className="w-full gap-2"
                           onClick={() => {
-                            if (integration.id === 'elevenlabs') {
-                              setShowElevenLabsConfig(true);
-                            } else if (integration.id === 'google-calendar') {
-                              setShowGoogleCalendarConfig(true);
-                            } else if (integration.id === 'google-sheets') {
-                              setShowGoogleSheetsConfig(true);
-                            } else if (integration.id === 'knowledge-nexus') {
-                              setShowKnowledgeNexusConfig(true);
-                            }
-                          }}
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                          {t('edit.integrations.activate') || 'ATIVAR'}
+                              if (integration.id === 'elevenlabs') {
+                                setShowElevenLabsConfig(true);
+                              } else if (integration.id === 'google-calendar') {
+                                setShowGoogleCalendarConfig(true);
+                              } else if (integration.id === 'google-sheets') {
+                                setShowGoogleSheetsConfig(true);
+                              } else if (integration.id === 'knowledge-nexus') {
+                                setShowKnowledgeNexusConfig(true);
+                              } else if (integration.id === 'via-cep') {
+                                setShowViaCepConfig(true);
+                              }
+                            }}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            {t('edit.integrations.activate') || 'ATIVAR'}
                         </Button>
                       ) : (
                         <>
@@ -377,6 +394,25 @@ const IntegrationsSection = ({
                 }
                 // Reload configs to update status
                 reloadConfigs();
+              }
+            : undefined
+        }
+      />
+
+      {/* Dialog de configuração ViaCEP */}
+      <ViaCepConfigDialog
+        open={showViaCepConfig}
+        onOpenChange={setShowViaCepConfig}
+        initialConfig={
+          integrations['via-cep'] as { enabled?: boolean } | undefined
+        }
+        onSave={async config => {
+          await persistIntegration('via-cep', config as unknown as Record<string, unknown>);
+        }}
+        onDeactivate={
+          integrations['via-cep']
+            ? async () => {
+                await removeIntegration('via-cep');
               }
             : undefined
         }

@@ -93,7 +93,7 @@ export default function Campaigns() {
 
         setState(prev => ({
           ...prev,
-          campaigns: response.data,
+          campaigns: response.data || [],
           meta: {
             pagination: {
               page: response.meta?.pagination?.page || 1,
@@ -382,7 +382,7 @@ export default function Campaigns() {
           <div className="flex items-center justify-center py-16">
             <div className="text-muted-foreground">{t('loading.campaigns')}</div>
           </div>
-        ) : state.campaigns.length === 0 ? (
+        ) : !state.campaigns || state.campaigns.length === 0 ? (
           <EmptyState
             icon={Megaphone}
             title={t('empty.title')}
@@ -396,7 +396,7 @@ export default function Campaigns() {
         ) : (
           <CampaignsTable
             campaigns={state.campaigns}
-            selectedCampaigns={state.campaigns.filter(c => state.selectedCampaignIds.includes(c.id))}
+            selectedCampaigns={(state.campaigns || []).filter(c => state.selectedCampaignIds.includes(c.id))}
             loading={state.loading.list}
             onSelectionChange={selected =>
               setState(prev => ({ ...prev, selectedCampaignIds: selected.map(c => c.id) }))
