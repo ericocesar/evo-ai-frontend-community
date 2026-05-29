@@ -42,6 +42,12 @@ interface ViaCepConfig {
   enabled?: boolean;
 }
 
+interface FaturaParserConfig {
+  provider?: string;
+  connected?: boolean;
+  enabled?: boolean;
+}
+
 interface UseIntegrationsReturn {
   // Configs
   elevenLabsConfig: ElevenLabsConfig | null;
@@ -49,6 +55,7 @@ interface UseIntegrationsReturn {
   googleSheetsConfig: GoogleSheetsConfig | null;
   knowledgeNexusConfig: KnowledgeNexusConfig | null;
   viaCepConfig: ViaCepConfig | null;
+  faturaParserConfig: FaturaParserConfig | null;
 
   // Status
   credentialsConfigured: Record<string, boolean>;
@@ -103,6 +110,7 @@ export function useIntegrations(agentId: string): UseIntegrationsReturn {
   const [googleSheetsConfig, setGoogleSheetsConfig] = useState<GoogleSheetsConfig | null>(null);
   const [knowledgeNexusConfig, setKnowledgeNexusConfig] = useState<KnowledgeNexusConfig | null>(null);
   const [viaCepConfig, setViaCepConfig] = useState<ViaCepConfig | null>(null);
+  const [faturaParserConfig, setFaturaParserConfig] = useState<FaturaParserConfig | null>(null);
 
   const [isCheckingIntegrations, setIsCheckingIntegrations] = useState(true);
   const [credentialsConfigured, setCredentialsConfigured] = useState<Record<string, boolean>>({
@@ -111,6 +119,7 @@ export function useIntegrations(agentId: string): UseIntegrationsReturn {
     'google-sheets': false,
     'knowledge-nexus': false,
     'via-cep': false,
+    'fatura-parser': false,
   });
 
   const loadConfigs = useCallback(async () => {
@@ -131,6 +140,7 @@ export function useIntegrations(agentId: string): UseIntegrationsReturn {
         'google-sheets': false,
         'knowledge-nexus': false,
         'via-cep': false,
+        'fatura-parser': false,
       };
 
       items.forEach(item => {
@@ -176,6 +186,13 @@ export function useIntegrations(agentId: string): UseIntegrationsReturn {
             ) as unknown as ViaCepConfig)
           : null
       );
+      setFaturaParserConfig(
+        configsByProvider['fatura-parser']
+          ? (sanitizeConfig(
+              configsByProvider['fatura-parser']
+            ) as unknown as FaturaParserConfig)
+          : null
+      );
     } catch (error) {
       console.error('Error loading integrations:', error);
       // Reset both credentials flags and per-integration configs so the UI
@@ -185,12 +202,14 @@ export function useIntegrations(agentId: string): UseIntegrationsReturn {
       setGoogleSheetsConfig(null);
       setKnowledgeNexusConfig(null);
       setViaCepConfig(null);
+      setFaturaParserConfig(null);
       setCredentialsConfigured({
         elevenlabs: false,
         'google-calendar': false,
         'google-sheets': false,
         'knowledge-nexus': false,
         'via-cep': false,
+        'fatura-parser': false,
       });
     } finally {
       setIsCheckingIntegrations(false);
@@ -205,19 +224,20 @@ export function useIntegrations(agentId: string): UseIntegrationsReturn {
     (integrationId: string): boolean => {
       const configMap: Record<
         string,
-        ElevenLabsConfig | GoogleCalendarConfig | GoogleSheetsConfig | KnowledgeNexusConfig | ViaCepConfig | null
+        ElevenLabsConfig | GoogleCalendarConfig | GoogleSheetsConfig | KnowledgeNexusConfig | ViaCepConfig | FaturaParserConfig | null
       > = {
         elevenlabs: elevenLabsConfig,
         'google-calendar': googleCalendarConfig,
         'google-sheets': googleSheetsConfig,
         'knowledge-nexus': knowledgeNexusConfig,
         'via-cep': viaCepConfig,
+        'fatura-parser': faturaParserConfig,
       };
 
       const config = configMap[integrationId];
       return config?.connected === true;
     },
-    [elevenLabsConfig, googleCalendarConfig, googleSheetsConfig, knowledgeNexusConfig, viaCepConfig]
+    [elevenLabsConfig, googleCalendarConfig, googleSheetsConfig, knowledgeNexusConfig, viaCepConfig, faturaParserConfig]
   );
 
   return {
@@ -226,6 +246,7 @@ export function useIntegrations(agentId: string): UseIntegrationsReturn {
     googleSheetsConfig,
     knowledgeNexusConfig,
     viaCepConfig,
+    faturaParserConfig,
     credentialsConfigured,
     isCheckingIntegrations,
     reloadConfigs: loadConfigs,

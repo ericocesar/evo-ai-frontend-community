@@ -8,7 +8,7 @@ import {
   CardTitle,
   Button,
 } from '@evoapi/design-system';
-import { ExternalLink, Plug, Check, Settings, Loader2, AlertCircle, MapPin } from 'lucide-react';
+import { ExternalLink, Plug, Check, Settings, Loader2, AlertCircle, MapPin, FileText } from 'lucide-react';
 import ElevenLabsConfigDialog from '@/components/integrations/ElevenLabsConfigDialog';
 import GoogleCalendarConfigDialog from '@/components/integrations/GoogleCalendarConfigDialog';
 import GoogleSheetsConfigDialog from '@/components/integrations/GoogleSheetsConfigDialog';
@@ -16,6 +16,7 @@ import KnowledgeNexusConfigDialog, {
   type KnowledgeNexusConfig,
 } from '@/components/integrations/KnowledgeNexusConfigDialog';
 import ViaCepConfigDialog from '@/components/integrations/ViaCepConfigDialog';
+import FaturaParserConfigDialog from '@/components/integrations/FaturaParserConfigDialog';
 import { useIntegrations } from '@/hooks/useIntegrations';
 import { agentIntegrationsService } from '@/services/agents/agentIntegrationsService';
 import { toast } from 'sonner';
@@ -44,6 +45,7 @@ const IntegrationsSection = ({
   const [showGoogleSheetsConfig, setShowGoogleSheetsConfig] = useState(false);
   const [showKnowledgeNexusConfig, setShowKnowledgeNexusConfig] = useState(false);
   const [showViaCepConfig, setShowViaCepConfig] = useState(false);
+  const [showFaturaParserConfig, setShowFaturaParserConfig] = useState(false);
 
   // Use custom hook for integrations status
   const { credentialsConfigured, isCheckingIntegrations, isConnected, reloadConfigs } =
@@ -104,7 +106,7 @@ const IntegrationsSection = ({
   // pelo administrador. Google Calendar / Sheets usam OAuth global e portanto
   // só ficam disponíveis quando `credentialsConfigured` indica que o admin
   // configurou as chaves correspondentes.
-  const ALWAYS_AVAILABLE_INTEGRATIONS = ['elevenlabs', 'knowledge-nexus', 'via-cep'];
+  const ALWAYS_AVAILABLE_INTEGRATIONS = ['elevenlabs', 'knowledge-nexus', 'via-cep', 'fatura-parser'];
 
   const availableIntegrations: Integration[] = [
     {
@@ -141,6 +143,13 @@ const IntegrationsSection = ({
       description:
         t('edit.integrations.viaCep.description') ||
         'Permite que o agente consulte CEPs brasileiros e obtenha endereço completo (logradouro, bairro, cidade, UF) durante o atendimento.',
+    },
+    {
+      id: 'fatura-parser',
+      name: 'Leitor de Faturas',
+      description:
+        t('edit.integrations.faturaParser.description') ||
+        'Permite que o agente leia faturas de energia enviadas como PDF ou imagem e extraia automaticamente valor, concessionária, consumo e vencimento.',
     },
     // {
     //   id: 'gmail',
@@ -200,6 +209,8 @@ const IntegrationsSection = ({
                       <div className="flex items-center justify-center w-20 h-20 p-3 rounded-lg bg-muted/50">
                         {integration.id === 'via-cep' ? (
                           <MapPin className="h-12 w-12 text-red-500" />
+                        ) : integration.id === 'fatura-parser' ? (
+                          <FileText className="h-12 w-12 text-amber-500" />
                         ) : (
                           <BrandIcon id={integration.id} size={48} className="h-12 w-12" />
                         )}
@@ -231,7 +242,7 @@ const IntegrationsSection = ({
                           {/* Botão de Status - Conectado */}
                           <Button
                             variant="success"
-                            className="w-full gap-2 bg-green-600 text-white hover:bg-green-700 border-green-600 cursor-default"
+                            className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/85 border-primary cursor-default"
                             disabled
                           >
                             <Check className="h-4 w-4" />
@@ -252,6 +263,8 @@ const IntegrationsSection = ({
                                 setShowKnowledgeNexusConfig(true);
                               } else if (integration.id === 'via-cep') {
                                 setShowViaCepConfig(true);
+                              } else if (integration.id === 'fatura-parser') {
+                                setShowFaturaParserConfig(true);
                               }
                             }}
                           >
@@ -274,6 +287,8 @@ const IntegrationsSection = ({
                                 setShowKnowledgeNexusConfig(true);
                               } else if (integration.id === 'via-cep') {
                                 setShowViaCepConfig(true);
+                              } else if (integration.id === 'fatura-parser') {
+                                setShowFaturaParserConfig(true);
                               }
                             }}
                           >
@@ -413,6 +428,25 @@ const IntegrationsSection = ({
           integrations['via-cep']
             ? async () => {
                 await removeIntegration('via-cep');
+              }
+            : undefined
+        }
+      />
+
+      {/* Dialog de configuração Leitor de Faturas */}
+      <FaturaParserConfigDialog
+        open={showFaturaParserConfig}
+        onOpenChange={setShowFaturaParserConfig}
+        initialConfig={
+          integrations['fatura-parser'] as { enabled?: boolean } | undefined
+        }
+        onSave={async config => {
+          await persistIntegration('fatura-parser', config as unknown as Record<string, unknown>);
+        }}
+        onDeactivate={
+          integrations['fatura-parser']
+            ? async () => {
+                await removeIntegration('fatura-parser');
               }
             : undefined
         }
