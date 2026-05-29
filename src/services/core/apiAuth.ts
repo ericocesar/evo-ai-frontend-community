@@ -3,9 +3,8 @@ import { useAuthStore } from '@/store/authStore';
 import { requestMonitor } from '@/utils/requestMonitor';
 import { applySetupInterceptor } from '@/services/core/setupInterceptor';
 
-// Create a separate axios instance for auth-service
-// Use nginx proxy (port 3030) or direct auth service URL
-const authApiBaseURL = import.meta.env.VITE_AUTH_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3030';
+// Create a separate axios instance for auth-service.
+const authApiBaseURL = import.meta.env.VITE_AUTH_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3001';
 const authApi = axios.create({
   baseURL: `${authApiBaseURL}/api/v1`,
   headers: {
@@ -76,6 +75,10 @@ authApi.interceptors.request.use((config) => {
     if (authHeader) {
       config.headers.Authorization = authHeader.Authorization;
     }
+  }
+
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
   }
 
   return config;

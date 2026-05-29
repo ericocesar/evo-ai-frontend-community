@@ -19,6 +19,10 @@ evoaiApi.interceptors.request.use((config) => {
     config.headers.Authorization = authHeader.Authorization;
   }
 
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+
   return config;
 });
 

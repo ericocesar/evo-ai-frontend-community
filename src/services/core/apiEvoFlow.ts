@@ -16,6 +16,10 @@ evoFlowApi.interceptors.request.use((config) => {
   if (authHeader) {
     config.headers.Authorization = authHeader.Authorization;
   }
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+
   return config;
 });
 

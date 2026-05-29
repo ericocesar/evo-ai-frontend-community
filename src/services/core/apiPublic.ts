@@ -19,8 +19,7 @@ apiPublic.interceptors.request.use((config) => {
     config.headers.Authorization = authHeader.Authorization;
   }
 
-  // Don't override Content-Type for FormData requests
-  if (config.data instanceof FormData && config.headers['Content-Type'] === undefined) {
+  if (config.data instanceof FormData) {
     delete config.headers['Content-Type'];
   }
 
