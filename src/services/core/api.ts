@@ -3,6 +3,12 @@ import { useAuthStore } from '@/store/authStore';
 import { requestMonitor } from '@/utils/requestMonitor';
 import apiAuth from '@/services/core/apiAuth';
 import { applySetupInterceptor } from '@/services/core/setupInterceptor';
+import {
+  isRefreshing as sharedIsRefreshing,
+  setIsRefreshing,
+  failedQueue as sharedFailedQueue,
+  processQueue,
+} from '@/services/core/tokenRefresh';
 
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/api/v1`,
@@ -23,24 +29,7 @@ const AUTH_INVALIDATION_ERROR_CODES = new Set<string>([
   'SESSION_EXPIRED',
 ]);
 
-let isRefreshing = false;
 let isTerminatingSession = false;
-let failedQueue: Array<{
-  resolve: (value?: unknown) => void;
-  reject: (reason?: unknown) => void;
-}> = [];
-
-const processQueue = (error: Error | null, token: string | null = null) => {
-  failedQueue.forEach(prom => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-
-  failedQueue = [];
-};
 
 const terminateSession = () => {
   if (isTerminatingSession) return;
@@ -104,9 +93,9 @@ api.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-      if (isRefreshing) {
+      if (sharedIsRefreshing) {
         return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
+          sharedFailedQueue.push({ resolve, reject });
         })
           .then(() => {
             const authHeader = useAuthStore.getState().getAuthHeader();
@@ -119,7 +108,7 @@ api.interceptors.response.use(
       }
 
       originalRequest._retry = true;
-      isRefreshing = true;
+      setIsRefreshing(true);
 
       try {
         const refreshResponse = await apiAuth.post('/auth/refresh');
@@ -137,11 +126,11 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         }
 
-        isRefreshing = false;
+        setIsRefreshing(false);
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError as Error, null);
-        isRefreshing = false;
+        setIsRefreshing(false);
       }
     }
 
