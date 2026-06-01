@@ -38,6 +38,14 @@ export interface CustomAttributesFormProps {
   onUpdateSuccess?: () => void;
   /** Whether the form is disabled */
   disabled?: boolean;
+  /**
+   * Optional grid layout for defined attributes. Each inner array = one row;
+   * each string = an `attribute_key` to render in that row, side by side.
+   * Keys not present here fall through to a single-column "remaining" section
+   * below the grid. If omitted, the legacy one-field-per-row layout is used.
+   * Only applied in `mode="form"`.
+   */
+  fieldLayout?: string[][];
   /** Optional custom translation namespace (defaults to 'customAttributes' for form mode, 'chat' for editable mode) */
   translationNamespace?: string;
   /** Translation keys for messages (used in 'editable' mode) */
@@ -65,6 +73,7 @@ export default function CustomAttributesForm({
   onUpdateAttributes,
   onUpdateSuccess,
   disabled = false,
+  fieldLayout,
   translationNamespace,
   translationKeys = {},
 }: CustomAttributesFormProps) {
@@ -589,6 +598,23 @@ export default function CustomAttributesForm({
   const definedAttributeKeys = definedAttributes.map(attr => attr.attribute_key);
   const adHocAttributes = attributeEntries.filter(([key]) => !definedAttributeKeys.includes(key));
 
+  // Partition defined attributes into the configured grid rows (form mode only)
+  // and a "remaining" group for any defined key not present in the layout.
+  // Both groups are empty arrays when no fieldLayout is supplied; in that case
+  // the renderer below falls back to a single column per field.
+  const layoutKeys = new Set((fieldLayout ?? []).flat());
+  const definedByKey = new Map(
+    definedAttributes.map(a => [a.attribute_key, a])
+  );
+  const rows: CustomAttributeDefinition[][] = (fieldLayout ?? []).map(rowKeys =>
+    rowKeys
+      .map(k => definedByKey.get(k))
+      .filter((a): a is CustomAttributeDefinition => Boolean(a))
+  );
+  const leftover: CustomAttributeDefinition[] = definedAttributes.filter(
+    a => !layoutKeys.has(a.attribute_key)
+  );
+
   // Editable mode rendering
   if (mode === 'editable') {
     if (loading) {
@@ -640,27 +666,64 @@ export default function CustomAttributesForm({
               {t('sections.defined')}
             </Label>
           </div>
-          <div className="space-y-3">
-            {definedAttributes.map(attribute => (
-              <Card key={attribute.attribute_key}>
-                <CardContent className="p-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Label className="text-sm font-medium">
-                        {attribute.attribute_display_name}
-                      </Label>
-                      {attribute.attribute_description && (
-                        <span className="text-xs text-muted-foreground">
-                          - {attribute.attribute_description}
-                        </span>
-                      )}
+
+          {/* Layout rows (side by side) — only rendered when fieldLayout is provided */}
+          {rows.length > 0 && (
+            <div className="space-y-3">
+              {rows.map((row, rowIdx) => (
+                <div
+                  key={`row-${rowIdx}`}
+                  className="grid grid-cols-1 gap-3 md:grid-cols-[repeat(var(--cols),minmax(0,1fr))]"
+                  style={{ ['--cols' as string]: String(row.length) }}
+                >
+                  {row.map(attribute => (
+                    <Card key={attribute.attribute_key}>
+                      <CardContent className="p-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Label className="text-sm font-medium">
+                              {attribute.attribute_display_name}
+                            </Label>
+                            {attribute.attribute_description && (
+                              <span className="text-xs text-muted-foreground">
+                                - {attribute.attribute_description}
+                              </span>
+                            )}
+                          </div>
+                          {renderFormField(attribute)}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Remaining defined attributes (no key in fieldLayout) — single column */}
+          {leftover.length > 0 && (
+            <div className="space-y-3">
+              {leftover.map(attribute => (
+                <Card key={attribute.attribute_key}>
+                  <CardContent className="p-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm font-medium">
+                          {attribute.attribute_display_name}
+                        </Label>
+                        {attribute.attribute_description && (
+                          <span className="text-xs text-muted-foreground">
+                            - {attribute.attribute_description}
+                          </span>
+                        )}
+                      </div>
+                      {renderFormField(attribute)}
                     </div>
-                    {renderFormField(attribute)}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
