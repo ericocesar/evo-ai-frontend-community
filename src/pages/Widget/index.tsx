@@ -355,7 +355,7 @@ export default function Widget() {
                 ...prev,
                 title: s.welcomeHeading || prev.title,
                 subtitle: s.welcomeTagline || prev.subtitle,
-                color: s.widgetColor || s.color || '#00d4aa',
+                color: s.widgetColor || s.color || '#2563eb',
                 avatarUrl: s.avatarUrl || s.avatar_url || prev.avatarUrl,
               }));
             }
@@ -543,7 +543,7 @@ export default function Widget() {
             ...prev,
             title: wcfg.welcome_title || cfg.channelConfig?.websiteName || prev.title,
             subtitle: wcfg.welcome_tagline || prev.subtitle,
-            color: wcfg.widget_color || cfg.channelConfig?.widgetColor || '#00d4aa',
+            color: wcfg.widget_color || cfg.channelConfig?.widgetColor || '#2563eb',
             avatarUrl: wcfg.avatar_url || cfg.inboxAvatarUrl || prev.avatarUrl,
           }));
           setReplyTime(wcfg.reply_time || undefined);
@@ -1646,7 +1646,7 @@ export default function Widget() {
         <Header
           title={ui.title || t('header.defaultTitle')}
           subtitle={ui.subtitle || t('header.defaultSubtitle')}
-          color={ui.color || '#00d4aa'}
+          color={ui.color || '#2563eb'}
           online={online}
           avatarUrl={ui.avatarUrl}
           replyTime={enhancedConfig.replyWaitMessage || replyTime}
@@ -1679,7 +1679,7 @@ export default function Widget() {
                 config={widgetConfig}
                 currentUser={currentUser}
                 activeCampaign={activeCampaign}
-                widgetColor={ui.color || '#00d4aa'}
+                widgetColor={ui.color || '#2563eb'}
                 onSubmit={(data) => { setPreChatServerErrors({}); handlePreChatSubmit(data); }}
                 isLoading={isCreatingConversation}
                 serverErrors={preChatServerErrors}
@@ -1697,7 +1697,7 @@ export default function Widget() {
                   onRetry={(_id, text) => handleSend(text)}
                   onReply={handleReplyToMessage}
                   onSelectOption={handleSelectOption}
-                  widgetColor={ui.color || '#00d4aa'}
+                  widgetColor={ui.color || '#2563eb'}
                   onLoadMore={loadOlderMessages}
                   isLoadingMore={isLoadingOlderMessages}
                   hasMore={hasMoreMessages}
@@ -1741,7 +1741,7 @@ export default function Widget() {
                         }
                         onSuccess={() => showToast(t('toast.emailTranscriptSuccess'), 'success')}
                         onError={error => showToast(error, 'error')}
-                        widgetColor={ui.color || '#00d4aa'}
+                        widgetColor={ui.color || '#2563eb'}
                       />
                     </div>
                   </div>
@@ -1751,7 +1751,7 @@ export default function Widget() {
                 {enhancedConfig.hideReplyBox ? (
                   <StartNewConversationButton
                     onStartNew={handleStartNewConversation}
-                    widgetColor={ui.color || '#00d4aa'}
+                    widgetColor={ui.color || '#2563eb'}
                   />
                 ) : (
                   <FooterReplyTo
@@ -1760,7 +1760,7 @@ export default function Widget() {
                     onSend={handleSend}
                     onUpload={handleFileUpload}
                     isUploading={pendingUploads.length > 0}
-                    widgetColor={ui.color || '#00d4aa'}
+                    widgetColor={ui.color || '#2563eb'}
                     onTyping={toggleUserTyping}
                   />
                 )}

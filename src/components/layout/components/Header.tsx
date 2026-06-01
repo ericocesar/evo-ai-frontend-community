@@ -29,6 +29,8 @@ import { ThemeToggle } from '../../ThemeToggle';
 import { AppLogo } from '../../AppLogo';
 import { PluginSlot } from '@/plugin-host';
 
+const bchatLogoSrc = `${import.meta.env.BASE_URL}bchatcomprido-crm.png?v=9c2f8a66093b`;
+
 // Utility function for className merging
 function cn(...classes: (string | undefined | null | false)[]) {
   return classes.filter(Boolean).join(' ');
@@ -199,7 +201,7 @@ export default function Header({
         {/* Center: Logo */}
         <div className="flex-1 flex justify-center">
           <div className="flex items-center gap-2">
-            <AppLogo className="h-8 max-w-32" />
+            <AppLogo className="h-8 max-w-32" src={bchatLogoSrc} />
           </div>
         </div>
 
@@ -227,7 +229,7 @@ export default function Header({
           {/* App Logo - only show when not collapsed */}
           {!isCollapsed && (
             <div className="flex-shrink-0 flex items-center gap-2">
-              <AppLogo className="h-8 max-w-32" />
+              <AppLogo className="h-8 max-w-32" src={bchatLogoSrc} />
             </div>
           )}
 

@@ -114,7 +114,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
               size="sm"
               onClick={startRecording}
               disabled={disabled}
-              className="bg-green-500 hover:bg-green-600 text-white"
+              className="bg-primary hover:bg-primary/85 text-primary-foreground"
             >
               <Mic className="h-4 w-4 mr-1" />
               {t('audioRecorder.record')}
@@ -169,7 +169,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
             size="sm"
             onClick={handleComplete}
             disabled={disabled}
-            className="bg-green-500 hover:bg-green-600 text-white"
+            className="bg-primary hover:bg-primary/85 text-primary-foreground"
           >
             {t('audioRecorder.send')}
           </Button>

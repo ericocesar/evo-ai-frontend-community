@@ -216,7 +216,7 @@ export function useWidgetChat() {
                 ...prev,
                 title: s.welcomeHeading || prev.title,
                 subtitle: s.welcomeTagline || prev.subtitle,
-                color: s.widgetColor || s.color || '#00d4aa',
+                color: s.widgetColor || s.color || '#2563eb',
                 avatarUrl: s.avatarUrl || s.avatar_url || prev.avatarUrl,
               }));
             }
@@ -304,7 +304,7 @@ export function useWidgetChat() {
             ...prev,
             title: wcfg.welcome_title || cfg.channelConfig?.websiteName || prev.title,
             subtitle: wcfg.welcome_tagline || prev.subtitle,
-            color: wcfg.widget_color || cfg.channelConfig?.widgetColor || '#00d4aa',
+            color: wcfg.widget_color || cfg.channelConfig?.widgetColor || '#2563eb',
             avatarUrl: wcfg.avatar_url || cfg.inboxAvatarUrl || prev.avatarUrl,
           }));
           setReplyTime(wcfg.reply_time || undefined);

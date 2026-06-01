@@ -72,7 +72,7 @@ export function WidgetChatScreen({
   onToast,
   websiteToken,
 }: WidgetChatScreenProps) {
-  const widgetColor = ui.color || '#00d4aa';
+  const widgetColor = ui.color || '#2563eb';
 
   return (
     <>

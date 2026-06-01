@@ -84,6 +84,37 @@ export function AgentChatMessage({ message }: AgentChatMessageProps) {
       return textParts.join('\n\n');
     }
 
+    const inlineDataParts = parts.filter((part: any) => part.inline_data || part.inlineData);
+    if (inlineDataParts.length > 0) {
+      const names = inlineDataParts
+        .map((part: any) => {
+          const data = part.inline_data || part.inlineData || {};
+          return data.metadata?.filename || data.filename || 'Arquivo';
+        })
+        .join(', ');
+      return `📎 Anexo recebido: ${names}`;
+    }
+
+    const fileDataParts = parts.filter((part: any) => part.file_data || part.fileData);
+    if (fileDataParts.length > 0) {
+      const names = fileDataParts
+        .map((part: any) => {
+          const data = part.file_data || part.fileData || {};
+          return data.filename || 'Arquivo';
+        })
+        .join(', ');
+      return `📎 Arquivo: ${names}`;
+    }
+
+    const thoughtParts = parts
+      .filter((part: any) => part.thought)
+      .map((part: any) => part.thought)
+      .filter((t: any) => t) as string[];
+
+    if (thoughtParts.length > 0) {
+      return thoughtParts.join('\n\n');
+    }
+
     return 'Empty content';
   };
 

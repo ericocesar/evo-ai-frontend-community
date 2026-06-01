@@ -134,7 +134,7 @@ const SchemaField = ({ fieldKey, field, onUpdate, onRemove, isReadOnly }: Schema
               variant="outline"
               size="sm"
               onClick={handleSave}
-              className="text-green-600 hover:text-green-700 hover:bg-green-50"
+              className="text-primary hover:text-primary hover:bg-primary/10"
             >
               <Save className="h-3 w-3 mr-1" />
               {t('actions.save')}

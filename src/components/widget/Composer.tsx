@@ -19,7 +19,7 @@ const Composer: React.FC<ComposerProps> = ({
   onUpload,
   isUploading = false,
   onTyping,
-  widgetColor = '#00d4aa',
+  widgetColor = '#2563eb',
 }) => {
   const { t } = useLanguage('widget');
   const [text, setText] = useState('');

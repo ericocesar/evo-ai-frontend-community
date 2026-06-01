@@ -201,7 +201,7 @@ const EmailForm: React.FC<EmailFormProps> = ({ provider, onSuccess, onBack }) =>
                   onClick={handleOAuthLogin}
                   disabled={isRequestingAuthorization}
                   size="lg"
-                  className="w-full min-h-[48px] bg-green-500 hover:bg-green-600 text-white"
+                  className="w-full min-h-[48px] bg-primary hover:bg-primary/85 text-primary-foreground"
                 >
                   {isRequestingAuthorization ? (
                     <>

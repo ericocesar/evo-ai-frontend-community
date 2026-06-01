@@ -47,7 +47,7 @@ export function MCPCard({
         <>
           <Button
             variant="success"
-            className="w-full gap-2 bg-green-600 text-white hover:bg-green-700 border-green-600 cursor-default"
+            className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/85 border-primary cursor-default"
             disabled
           >
             <Check className="h-4 w-4" />
@@ -125,4 +125,3 @@ export function MCPCard({
     </Card>
   );
 }
-

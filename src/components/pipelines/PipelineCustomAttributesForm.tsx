@@ -13,6 +13,7 @@ import {
   SelectValue,
   Textarea,
   Switch,
+  Badge,
 } from '@evoapi/design-system';
 import { Plus, X, Settings } from 'lucide-react';
 import { customAttributesService } from '@/services/customAttributes/customAttributesService';
@@ -68,7 +69,8 @@ export default function PipelineCustomAttributesForm({
   const [newAttributeKey, setNewAttributeKey] = useState('');
   const [newAttributeValue, setNewAttributeValue] = useState('');
   const [newAttributeType, setNewAttributeType] = useState<AttributeDisplayType>('text');
-  const [newAttributeListValues, setNewAttributeListValues] = useState('');
+  const [newAttributeListValues, setNewAttributeListValues] = useState<string[]>([]);
+  const [newListValueInput, setNewListValueInput] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [createError, setCreateError] = useState('');
   const hasLoadedRef = useRef(false);
@@ -234,7 +236,8 @@ export default function PipelineCustomAttributesForm({
     setNewAttributeKey('');
     setNewAttributeValue('');
     setNewAttributeType('text');
-    setNewAttributeListValues('');
+    setNewAttributeListValues([]);
+    setNewListValueInput('');
     setCreateError('');
   };
 
@@ -285,10 +288,7 @@ export default function PipelineCustomAttributesForm({
 
     let listValues: string[] | undefined;
     if (newAttributeType === 'list') {
-      listValues = newAttributeListValues
-        .split(',')
-        .map(value => value.trim())
-        .filter(Boolean);
+      listValues = newAttributeListValues;
       if (!listValues.length) {
         setCreateError(t('modal.fields.listValues.errors.required'));
         return;
@@ -758,14 +758,54 @@ export default function PipelineCustomAttributesForm({
                       </div>
                       {newAttributeType === 'list' && (
                         <div className="space-y-2">
-                          <Label htmlFor="attribute-list-values">{t('modal.fields.listValues.label')}</Label>
-                          <Textarea
-                            id="attribute-list-values"
-                            value={newAttributeListValues}
-                            onChange={e => setNewAttributeListValues(e.target.value)}
-                            placeholder={t('modal.fields.listValues.placeholder')}
-                            rows={3}
-                          />
+                          <Label htmlFor="attribute-list-value-input">{t('modal.fields.listValues.label')}</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              id="attribute-list-value-input"
+                              value={newListValueInput}
+                              onChange={e => setNewListValueInput(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  const trimmed = newListValueInput.trim();
+                                  if (trimmed) {
+                                    setNewAttributeListValues(prev => [...prev, trimmed]);
+                                    setNewListValueInput('');
+                                  }
+                                }
+                              }}
+                              placeholder={t('modal.fields.listValues.placeholder')}
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => {
+                                const trimmed = newListValueInput.trim();
+                                if (trimmed) {
+                                  setNewAttributeListValues(prev => [...prev, trimmed]);
+                                  setNewListValueInput('');
+                                }
+                              }}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          {newAttributeListValues.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {newAttributeListValues.map((val, idx) => (
+                                <Badge key={idx} variant="secondary" className="flex items-center gap-1">
+                                  {val}
+                                  <button
+                                    type="button"
+                                    onClick={() => setNewAttributeListValues(prev => prev.filter((_, i) => i !== idx))}
+                                    className="ml-1 hover:text-destructive"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

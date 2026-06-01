@@ -15,7 +15,7 @@ const EmailTranscriptButton: React.FC<EmailTranscriptButtonProps> = ({
   onSuccess,
   onError,
   disabled = false,
-  widgetColor = '#00d4aa',
+  widgetColor = '#2563eb',
 }) => {
   const { t } = useLanguage('widget');
   const [isLoading, setIsLoading] = useState(false);

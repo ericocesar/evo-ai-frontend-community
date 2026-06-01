@@ -7,6 +7,27 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useAuthStore } from '@/store/authStore';
 
 const TOUR_ROUTE = '/channels';
+const WELCOME_TOUR_STORAGE_KEY = 'bchat:onboarding:welcome:hidden';
+
+function hasPersistedDismissal() {
+  if (typeof window === 'undefined') return false;
+
+  try {
+    return window.localStorage.getItem(WELCOME_TOUR_STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function persistDismissalPreference() {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.localStorage.setItem(WELCOME_TOUR_STORAGE_KEY, '1');
+  } catch {
+    // Ignore localStorage failures and rely on the server-backed tour state.
+  }
+}
 
 export function WelcomeTourModal() {
   const { t } = useTranslation('tours');
@@ -14,12 +35,13 @@ export function WelcomeTourModal() {
   const markTourCompleted = useAuthStore(state => state.markTourCompleted);
   const markTourSkipped = useAuthStore(state => state.markTourSkipped);
 
+  const [dismissedForSession, setDismissedForSession] = useState(false);
   const [pendingTour, setPendingTour] = useState(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const dismissed = !!tours['onboarding:welcome'];
+  const dismissed = dismissedForSession || !!tours['onboarding:welcome'] || hasPersistedDismissal();
 
   // Only start the tour after we have navigated to TOUR_ROUTE
   useEffect(() => {
@@ -39,14 +61,22 @@ export function WelcomeTourModal() {
   if (dismissed) return null;
 
   const handleDismiss = () => {
+    setDismissedForSession(true);
+  };
+
+  const handleNeverShowAgain = () => {
+    persistDismissalPreference();
     markTourSkipped('onboarding:preference');
     markTourCompleted('onboarding:welcome');
+    setDismissedForSession(true);
   };
 
   const handleStartTour = () => {
+    persistDismissalPreference();
     markTourCompleted('onboarding:preference');
     markTourCompleted('onboarding:welcome');
     navigate(TOUR_ROUTE);
+    setDismissedForSession(true);
     setPendingTour(true);
   };
 
@@ -55,7 +85,7 @@ export function WelcomeTourModal() {
       <div className="bg-background rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 flex flex-col items-center gap-6 text-center">
         <div
           className="flex items-center justify-center rounded-full w-16 h-16"
-          style={{ backgroundColor: '#00C48C' }}
+          style={{ backgroundColor: 'var(--primary)' }}
         >
           <Map className="h-8 w-8 text-white" />
         </div>
@@ -71,12 +101,15 @@ export function WelcomeTourModal() {
           <Button
             onClick={handleStartTour}
             className="w-full"
-            style={{ backgroundColor: '#00C48C', color: '#fff' }}
+            style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}
           >
             {t('welcome.startButton')}
           </Button>
           <Button variant="ghost" onClick={handleDismiss} className="w-full text-muted-foreground">
             {t('welcome.skipButton')}
+          </Button>
+          <Button variant="outline" onClick={handleNeverShowAgain} className="w-full">
+            {t('welcome.neverShowAgainButton')}
           </Button>
         </div>
       </div>

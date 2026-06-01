@@ -77,7 +77,7 @@ const MessageList: React.FC<MessageListProps> = ({
   onRetry,
   onReply,
   onSelectOption,
-  widgetColor = '#00d4aa',
+  widgetColor = '#2563eb',
   onLoadMore,
   isLoadingMore = false,
   hasMore = true,

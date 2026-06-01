@@ -172,16 +172,31 @@ export function AgentChatProvider({ children, agentId }: AgentChatProviderProps)
 
     setIsSending(true);
 
-    // Create temporary user message for optimistic update
-    const tempUserMessage: ChatMessage = {
-      id: `temp-${Date.now()}`,
-      content: {
-        parts: [{ text: content }],
-        role: 'user',
-      },
-      author: 'user',
-      timestamp: Date.now() / 1000,
-    };
+      // Create temporary user message for optimistic update
+      const userParts: any[] = [];
+      if (content.trim()) {
+        userParts.push({ text: content });
+      }
+      if (files && files.length > 0) {
+        files.forEach(file => {
+          userParts.push({
+            inline_data: {
+              mime_type: file.content_type,
+              data: file.data,
+              metadata: { filename: file.filename },
+            },
+          });
+        });
+      }
+      const tempUserMessage: ChatMessage = {
+        id: `temp-${Date.now()}`,
+        content: {
+          parts: userParts,
+          role: 'user',
+        },
+        author: 'user',
+        timestamp: Date.now() / 1000,
+      };
 
     // Add user message immediately (optimistic update)
     setMessages(prev => [...prev, tempUserMessage]);
@@ -205,21 +220,36 @@ export function AgentChatProvider({ children, agentId }: AgentChatProviderProps)
           // Check if message_history contains user message
           const hasUserMessage = newMessages.some(msg => msg.author === 'user' || msg.content?.role === 'user');
 
-          // If message_history doesn't contain user message, create one from the sent content
-          let messagesToAdd = newMessages;
-          if (!hasUserMessage) {
-            // Create user message from the content we sent
-            const userMessage: ChatMessage = {
-              id: `user-${Date.now()}`,
-              content: {
-                parts: [{ text: content }],
-                role: 'user',
-              },
-              author: 'user',
-              timestamp: Date.now() / 1000,
-            };
-            messagesToAdd = [userMessage, ...newMessages];
-          }
+            // If message_history doesn't contain user message, create one from the sent content
+            let messagesToAdd = newMessages;
+            if (!hasUserMessage) {
+              // Create user message from the content we sent
+              const userMessageParts: any[] = [];
+              if (content.trim()) {
+                userMessageParts.push({ text: content });
+              }
+              if (files && files.length > 0) {
+                files.forEach(file => {
+                  userMessageParts.push({
+                    inline_data: {
+                      mime_type: file.content_type,
+                      data: file.data,
+                      metadata: { filename: file.filename },
+                    },
+                  });
+                });
+              }
+              const userMessage: ChatMessage = {
+                id: `user-${Date.now()}`,
+                content: {
+                  parts: userMessageParts.length > 0 ? userMessageParts : [{ text: content }],
+                  role: 'user',
+                },
+                author: 'user',
+                timestamp: Date.now() / 1000,
+              };
+              messagesToAdd = [userMessage, ...newMessages];
+            }
 
           // Add only new messages that don't already exist
           const newUniqueMessages = messagesToAdd.filter(msg => !existingIds.has(msg.id));

@@ -1,4 +1,4 @@
-import api from '@/services/core/api';
+import api from '@/services/core/apiEvoFlow';
 import type { ContactEventsQuery, ContactEventsResponse } from '@/types/contacts';
 
 interface MaybeEnveloped {

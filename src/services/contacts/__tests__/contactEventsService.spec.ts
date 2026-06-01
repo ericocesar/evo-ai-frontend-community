@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockGet = vi.fn();
-vi.mock('@/services/core/api', () => ({
+vi.mock('@/services/core/apiEvoFlow', () => ({
   default: { get: (...args: unknown[]) => mockGet(...args) },
 }));
 

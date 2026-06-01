@@ -1,7 +1,7 @@
 const rawAuthApiBaseURL =
   import.meta.env.VITE_AUTH_API_URL ||
   import.meta.env.VITE_API_URL ||
-  'http://localhost:3030';
+  'http://localhost:3001';
 
 const authOrigin = rawAuthApiBaseURL.replace(/\/api\/v\d+$/i, '').replace(/\/$/, '');
 

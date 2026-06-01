@@ -1,9 +1,10 @@
 {
   "welcome": {
-    "title": "Bem-vindo ao Evo CRM!",
+    "title": "Bem-vindo ao BChat CRM!",
     "description": "Quer fazer um tour guiado para conhecer as funcionalidades da plataforma?",
     "startButton": "Iniciar tour guiado",
-    "skipButton": "Prefiro explorar sozinho"
+    "skipButton": "Agora não",
+    "neverShowAgainButton": "Não exibir mais"
   },
   "viewPageTour": "Ver tour desta página",
   "soloHint": {

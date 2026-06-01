@@ -27,9 +27,6 @@ import {
   Phone,
   Mail,
   User,
-  History,
-  StickyNote,
-  Settings,
   Building2,
   Users,
   ExternalLink,
@@ -48,6 +45,9 @@ import ContactEventsErrorBoundary from './ContactEventsErrorBoundary';
 import { buildContactDetailsTabs } from './contactDetailsTabs';
 import { toast } from 'sonner';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
+import ContactHistoryTab from './ContactHistoryTab';
+import ContactNotesTab from './ContactNotesTab';
+import CustomAttributes from './CustomAttributes';
 
 interface ContactDetailsProps {
   open: boolean;
@@ -438,17 +438,11 @@ export default function ContactDetails({
               </TabsContent> */}
 
               <TabsContent value="history" className="py-6 mt-0">
-                <div className="text-center text-muted-foreground py-12">
-                  <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>{t('details.notImplemented.history')}</p>
-                </div>
+                {contact && <ContactHistoryTab contactId={contact.id} />}
               </TabsContent>
 
               <TabsContent value="notes" className="py-6 mt-0">
-                <div className="text-center text-muted-foreground py-12">
-                  <StickyNote className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>{t('details.notImplemented.notes')}</p>
-                </div>
+                {contact && <ContactNotesTab contactId={contact.id} />}
               </TabsContent>
 
               <TabsContent value="pipeline" className="py-6 mt-0">
@@ -467,10 +461,23 @@ export default function ContactDetails({
               </TabsContent>
 
               <TabsContent value="attributes" className="py-6 mt-0">
-                <div className="text-center text-muted-foreground py-12">
-                  <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>{t('details.notImplemented.attributes')}</p>
-                </div>
+                {contact && (
+                  <CustomAttributes
+                    attributes={contact.custom_attributes || {}}
+                    onAttributesChange={async (newAttrs) => {
+                      try {
+                        await contactsService.updateContact(contact.id, {
+                          custom_attributes: newAttrs,
+                        });
+                        onContactUpdated?.();
+                        toast.success(t('details.attributes.saveSuccess', 'Atributos atualizados com sucesso'));
+                      } catch (error) {
+                        console.error('Error updating contact attributes:', error);
+                        toast.error(t('details.attributes.saveError', 'Erro ao salvar atributos'));
+                      }
+                    }}
+                  />
+                )}
               </TabsContent>
             </div>
           </ScrollArea>

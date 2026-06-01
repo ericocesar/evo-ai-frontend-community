@@ -37,6 +37,8 @@ import { useGlobalConfig } from '@/contexts/GlobalConfigContext';
 
 import { AppLogo } from '@/components/AppLogo';
 
+const bchatLogoSrc = `${import.meta.env.BASE_URL}bchatcomprido-crm.png?v=9c2f8a66093b`;
+
 export const Auth: React.FC = () => {
   const { login: authLogin, mfaState, verifyMfaCode, clearMfaState, setMfaRequired } = useAuth();
   const navigate = useNavigate();
@@ -432,7 +434,7 @@ export const Auth: React.FC = () => {
         <div className="w-full max-w-md space-y-6">
           {/* Logo */}
           <div className="text-center">
-            <AppLogo className="h-10 mx-auto" />
+            <AppLogo className="h-20 mx-auto" src={bchatLogoSrc} />
           </div>
 
           {/* Formulário */}
